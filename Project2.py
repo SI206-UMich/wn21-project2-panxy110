@@ -1,3 +1,5 @@
+# By: Xingyu Pan, with Bohan Guo and Ted Yuan
+
 from bs4 import BeautifulSoup
 import requests
 import re
@@ -49,7 +51,13 @@ def get_book_summary(book_url):
     Make sure to strip() any newlines from the book title and number of pages.
     """
 
-    pass
+    r = requests.get(book_url)
+    soup = BeautifulSoup(r.content, 'html.parser')
+    anchor = soup.find('div', id = "metacol")
+    title = anchor.find(id = "book_title").text.strip('\n').strip()
+    author = anchor.find('a', class_ = "authorName").text
+    pages = anchor.find('span', itemprop = "pagenumber").text.strip('\n').strip()
+    return (title, author, pages)
 
 
 def summarize_best_books(filepath):
@@ -63,7 +71,17 @@ def summarize_best_books(filepath):
     ("Fiction", "The Testaments (The Handmaid's Tale, #2)", "https://www.goodreads.com/choiceawards/best-fiction-books-2020") 
     to your list of tuples.
     """
-    pass
+    tuples_list = []
+    filename = open(filepath)
+    soup = BeautifulSoup(filename, 'html.parser')
+    best_books = soup.find_all(class_ = "category clearFix")
+    for book in best_books:
+        anchor = book.find('a')
+        category = anchor.find('h4').text.strip('\n').strip()
+        title = anchor.find('img').get('alt', '')
+        urls = anchor.get('href')
+        tuples_list.append(tuple((str(category), str(title), str(urls))))
+    return tuples_list  
 
 
 def write_csv(data, filename):
@@ -86,7 +104,13 @@ def write_csv(data, filename):
 
     This function should not return anything.
     """
-    pass
+    path = os.path.dirname(__file__)
+    outFile = open(os.path.join(path, filename + '.cvs'), 'w', newline='')
+    csv_writer = csv.writer(outFile, delimiter = ',', quotechar = '"', quoting = csv.QUOTE_ALL)
+    csv_writer.writerow(['Book Title', 'Author Name'])
+    for tuples in data:
+        csv_writer.writerow(tuples)
+    outFile.close()
 
 
 def extra_credit(filepath):
@@ -99,9 +123,8 @@ def extra_credit(filepath):
     pass
 
 class TestCases(unittest.TestCase):
-
+    
     # call get_search_links() and save it to a static variable: search_urls
-
 
     def test_get_titles_from_search_results(self):
         # call get_titles_from_search_results() on search_results.htm and save to a local variable
@@ -115,16 +138,16 @@ class TestCases(unittest.TestCase):
         # check that the first book and author tuple is correct (open search_results.htm and find it)
 
         # check that the last title is correct (open search_results.htm and find it)
+        pass
 
     def test_get_search_links(self):
-        # check that TestCases.search_urls is a list
+        #check that TestCases.search_urls is a list
 
-        # check that the length of TestCases.search_urls is correct (10 URLs)
+        #check that the length of TestCases.search_urls is correct (10 URLs)
 
-
-        # check that each URL in the TestCases.search_urls is a string
-        # check that each URL contains the correct url for Goodreads.com followed by /book/show/
-
+        #check that each URL in the TestCases.search_urls is a string
+        #check that each URL contains the correct url for Goodreads.com followed by /book/show/
+        pass
 
     def test_get_book_summary(self):
         # create a local variable – summaries – a list containing the results from get_book_summary()
@@ -141,6 +164,7 @@ class TestCases(unittest.TestCase):
             # check that the third element in the tuple, i.e. pages is an int
 
             # check that the first book in the search has 337 pages
+            pass
 
 
     def test_summarize_best_books(self):
@@ -154,7 +178,8 @@ class TestCases(unittest.TestCase):
 
         # check that the first tuple is made up of the following 3 strings:'Fiction', "The Midnight Library", 'https://www.goodreads.com/choiceawards/best-fiction-books-2020'
 
-        # check that the last tuple is made up of the following 3 strings: 'Picture Books', 'A Beautiful Day in the Neighborhood: The Poetry of Mister Rogers', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'
+        # check that the last tuple is made up of the following 3 strings: 'Picture Books', 'Antiracist Baby', 'https://www.goodreads.com/choiceawards/best-picture-books-2020'
+        pass
 
 
     def test_write_csv(self):
@@ -171,7 +196,8 @@ class TestCases(unittest.TestCase):
 
         # check that the next row is 'Harry Potter and the Deathly Hallows (Harry Potter, #7)', 'J.K. Rowling'
 
-        # check that the last row is 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'Julian Harrison (Introduction)'
+        # check that the last row is 'Harry Potter: The Prequel (Harry Potter, #0.5)', 'J.K. Rowling'
+        pass
 
 
 
@@ -180,4 +206,4 @@ if __name__ == '__main__':
     unittest.main(verbosity=2)
 
 
-
+    
